@@ -1,33 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientsList from './IngredientList';
 import Search from './Search';
 
-const url = 'https://react-http-d27a2.firebaseio.com/ingrediants.json';
+const url = 'https://react-http-d27a2.firebaseio.com/ingredients.json';
 
 const Ingredients = (props) => {
   const [ingredients, setIngredients] = useState([]);
 
-  useEffect(() => {
-    getIngredients();
-  }, []);
-
-  const getIngredients = () => {
-    fetch(url)
-      .then(response => response.json())
-      .then(res => {
-        const data = [];
-        for(const key in res) {
-          data.push({
-            id: key,
-            title: res[key].title,
-            amount: res[key].amount,
-          })
-        }
-        setIngredients(data)
-      })
-  }
+  const filterHandler = useCallback(filteredIngredients => {setIngredients(filteredIngredients)}, [])
 
   const addIngredientsHandler = (ingredient) => {
     fetch(url, {
@@ -45,7 +27,7 @@ const Ingredients = (props) => {
       <IngredientForm onAddIngredient={addIngredientsHandler}/>
 
       <section>
-        <Search />
+        <Search onLoadIgrediants={filterHandler}/>
         <IngredientsList ingredients={ingredients} onRemoveItem={removeIngredientHandler}/>
       </section>
     </div>
