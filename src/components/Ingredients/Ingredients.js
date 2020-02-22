@@ -6,10 +6,16 @@ import Search from './Search';
 
 const url = 'https://react-http-d27a2.firebaseio.com/ingredients.json';
 
-const Ingredients = (props) => {
+const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
   const filterHandler = useCallback(filteredIngredients => {setIngredients(filteredIngredients)}, [])
+
+  const deleteIngredientReq = (ingredientId) => (
+    fetch(`https://react-http-d27a2.firebaseio.com/ingredients/${ingredientId}.json`, {
+      method: 'DELETE',
+    })
+  )
 
   const addIngredientsHandler = (ingredient) => {
     fetch(url, {
@@ -20,7 +26,10 @@ const Ingredients = (props) => {
       .then(response => response.json())
       .then(res => {setIngredients(prevIngredient => [...prevIngredient, {id: res.name, ...ingredient}])})
   }
-  const removeIngredientHandler = (id) => {setIngredients(prevIngredient => [...prevIngredient.filter(i => i.id !== id)])}
+  const removeIngredientHandler = id => {
+    deleteIngredientReq(id)
+      .then(setIngredients(prevIngredient => prevIngredient.filter(i => i.id !== id)))
+  }
 
   return (
     <div className="App">
