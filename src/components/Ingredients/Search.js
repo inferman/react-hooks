@@ -11,10 +11,10 @@ const Search = React.memo(props => {
   const inputRef = useRef();
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if(filteringChar === inputRef.current.value) getIngredients()
     }, 1000);
-    ;
+    return () => {clearTimeout(timer)}
   }, [filteringChar, onLoadIgrediants, inputRef]);
 
   const getIngredients = () => {
