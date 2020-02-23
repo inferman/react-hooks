@@ -8,6 +8,7 @@ const url = 'https://react-http-d27a2.firebaseio.com/ingredients.json';
 
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
+  const [isLoading, setLoading] = useState(false);
 
   const filterHandler = useCallback(filteredIngredients => {setIngredients(filteredIngredients)}, [])
 
@@ -18,22 +19,28 @@ const Ingredients = () => {
   )
 
   const addIngredientsHandler = (ingredient) => {
+    setLoading(true);
     fetch(url, {
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json' }
     })
-      .then(response => response.json())
+      .then(response => {
+        setLoading(false);
+        return response.json()
+      })
       .then(res => {setIngredients(prevIngredient => [...prevIngredient, {id: res.name, ...ingredient}])})
   }
   const removeIngredientHandler = id => {
+    setLoading(true);
     deleteIngredientReq(id)
       .then(setIngredients(prevIngredient => prevIngredient.filter(i => i.id !== id)))
+      .then(() => {setLoading(false)})
   }
 
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientsHandler}/>
+      <IngredientForm onAddIngredient={addIngredientsHandler} loading={isLoading}/>
 
       <section>
         <Search onLoadIgrediants={filterHandler}/>
