@@ -1,18 +1,32 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useReducer, useCallback} from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientsList from './IngredientList';
 import Search from './Search';
 import ErrorModal from '../UI/ErrorModal';
 
+const ingredientsReducer = (currentIngredients, action) => {
+  switch(action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [...currentIngredients, action.ingredient]
+    case 'DELETE':
+      return currentIngredients.filter(ing => ing.id !== action.id)
+    default:
+      throw new Error('some thing went wrong with reducer')
+  }
+}
+
 const url = 'https://react-http-d27a2.firebaseio.com/ingredients.json';
 
 const Ingredients = () => {
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, dispatch] = useReducer(ingredientsReducer, []);
+  // const [ingredients, setIngredients] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState();
 
-  const filterHandler = useCallback(filteredIngredients => {setIngredients(filteredIngredients)}, [])
+  const filterHandler = useCallback(filteredIngredients => {dispatch({type: 'SET', ingredients: filteredIngredients})}, [])
 
   const deleteIngredientReq = (ingredientId) => (
     fetch(`https://react-http-d27a2.firebaseio.com/ingredients/${ingredientId}.json`, {
@@ -31,12 +45,12 @@ const Ingredients = () => {
         setLoading(false);
         return response.json()
       })
-      .then(res => {setIngredients(prevIngredient => [...prevIngredient, {id: res.name, ...ingredient}])})
+      .then(res => {dispatch({type: 'ADD', ingredient: {id: res.name, ...ingredient}})})
   }
   const removeIngredientHandler = id => {
     setLoading(true);
     deleteIngredientReq(id)
-      .then(setIngredients(prevIngredient => prevIngredient.filter(i => i.id !== id)))
+      .then(dispatch({type: 'DELETE', id}))
       .then(() => {setLoading(false)})
       .catch(err => {
         setError('Something went wrong');
