@@ -11,6 +11,8 @@ const IngredientForm = React.memo(props => {
     event.preventDefault();
     onAddIngredient({title: inputName, amount: inputAmount})
   };
+  console.log(props);
+  
 
   return (
     <section className="ingredient-form">
